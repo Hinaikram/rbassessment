@@ -27,6 +27,17 @@ jobs:
       run: |
         docker build -t springboot-app .
 
+    - name: Log in to Amazon ECR
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Tag Docker image
+      run: |
+        docker tag springboot-app:latest 715841370482.dkr.ecr.ap-south-1.amazonaws.com/rb-ecr:latest
+
+    - name: Push Docker image to ECR
+      run: |
+        docker push 715841370482.dkr.ecr.ap-south-1.amazonaws.com/rb-ecr:latest
+
     - name: Upload JAR artifact
       uses: actions/upload-artifact@v4
       with:

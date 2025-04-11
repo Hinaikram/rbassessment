@@ -9,8 +9,12 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
 
     steps:
     - name: Checkout code
@@ -27,18 +31,18 @@ jobs:
 
     - name: Build Docker image
       run: |
-        docker build -t springboot-app:${{ github.sha }} .
+        docker build -t springboot-app .
 
     - name: Log in to Amazon ECR
       uses: aws-actions/amazon-ecr-login@v1
 
     - name: Tag Docker image
       run: |
-        docker tag springboot-app:${{ github.sha }} 715841370482.dkr.ecr.ap-south-1.amazonaws.com/rb-ecr:${{ github.sha }}
+        docker tag springboot-app:latest 715841370482.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/rb-ecr:latest
 
     - name: Push Docker image to ECR
       run: |
-        docker push 715841370482.dkr.ecr.ap-south-1.amazonaws.com/rb-ecr:${{ github.sha }}
+        docker push 715841370482.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/rb-ecr:latest
 
     - name: Upload JAR artifact
       uses: actions/upload-artifact@v4

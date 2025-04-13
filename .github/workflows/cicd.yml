@@ -1,59 +1,4 @@
-name: Build and Deploy Spring Boot App to EKS
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
 jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AWS_REGION: ${{ secrets.AWS_REGION }}  # Make sure this secret is set in your GitHub repository secrets
-      AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up Java
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: '17'
-
-    - name: Build with Maven
-      run: mvn clean install --no-transfer-progress
-
-    - name: Build Docker image
-      run: |
-        docker build -t springboot-app .
-
-    - name: Log in to Amazon ECR
-      uses: aws-actions/amazon-ecr-login@v1
-      with:
-        region: ${{ secrets.AWS_REGION }}  # Explicitly pass the AWS region
-
-    - name: Tag Docker image
-      run: |
-        docker tag springboot-app:latest 715841370482.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/rb-ecr:latest
-
-    - name: Push Docker image to ECR
-      run: |
-        docker push 715841370482.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/rb-ecr:latest
-
-    - name: Upload JAR artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: springboot-app
-        path: target/*.jar
-
   deploy:
     runs-on: ubuntu-latest
     needs: build
@@ -68,50 +13,25 @@ jobs:
         terraform_version: 1.5.0
 
     - name: Terraform Init
-      run: terraform init -backend=false  # Skipping the S3 backend initialization
-      working-directory: terraform-eks  # The directory for Terraform configuration inside your repo
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: ${{ secrets.AWS_REGION }}
+      run: terraform init
+      working-directory: terraform-eks  # Path to your Terraform configuration
 
     - name: Terraform Plan
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: ${{ secrets.AWS_REGION }}
       run: terraform plan -out=tfplan
-      working-directory: terraform-eks  # The directory for Terraform configuration inside your repo
+      working-directory: terraform-eks
 
     - name: Terraform Apply
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: ${{ secrets.AWS_REGION }}
       run: terraform apply -auto-approve tfplan
-      working-directory: terraform-eks  # The directory for Terraform configuration inside your repo
-
-    - name: Configure kubectl
-      run: |
-        aws eks --region ${{ secrets.AWS_REGION }} update-kubeconfig --name my-cluster
-
-    - name: Deploy Docker Image to EKS
-      run: |
-        kubectl set image deployment/springboot-app springboot-app=715841370482.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/rb-ecr:latest
-        kubectl rollout restart deployment/springboot-app
-
-    - name: Check Deployment Status
-      run: |
-        kubectl rollout status deployment/springboot-app
-
-    - name: Wait for 5 minutes before destroying the cluster
-      run: sleep 300  # Wait for 5 minutes (300 seconds)
-
-  destroy:
-    runs-on: ubuntu-latest
-    needs: deploy
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up Terraform
-      uses: hashicorp/setup-terraform@v1
-      with:
-        terraform_version: 1.5.0
-
-    - name: Terraform Init
-      run: terraform init -backend=false  # Skipping the S3 backend initialization
-      working-directory: terraform-eks  # The directory for Terraform configuration inside your repo
-
-    - name: Terraform Destroy
-      run: terraform destroy -auto-approve
-      working-directory: terraform-eks  # The directory for Terraform configuration inside your repo
+      working-directory: terraform-eks

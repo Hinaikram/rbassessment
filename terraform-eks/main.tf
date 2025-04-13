@@ -6,6 +6,29 @@ module "eks" {
   vpc_cidr             = var.vpc_cidr
   public_subnet_cidrs  = var.public_subnet_cidrs
   private_subnet_cidrs = var.private_subnet_cidrs
+  subnet_ids           = [aws_subnet.public_subnet.id, aws_subnet.private_subnet.id]  # Pass subnet IDs to EKS
+}
+
+# VPC Creation (Root Module)
+resource "aws_vpc" "main" {
+  cidr_block = var.vpc_cidr
+  enable_dns_support = true
+  enable_dns_hostnames = true
+}
+
+# Public Subnet
+resource "aws_subnet" "public_subnet" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = var.public_subnet_cidrs
+  availability_zone       = var.availability_zone
+  map_public_ip_on_launch = true
+}
+
+# Private Subnet
+resource "aws_subnet" "private_subnet" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = var.private_subnet_cidrs
+  availability_zone       = var.availability_zone
 }
 
 # Creating an Internet Gateway for Public Subnet Connectivity
@@ -65,4 +88,3 @@ resource "aws_security_group" "sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
-

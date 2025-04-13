@@ -15,23 +15,23 @@ module "vpc" {
   enable_nat_gateway   = true
   enable_dns_hostnames = true
 
-  # Tags for VPC and Subnets
+  # Tags for VPC
   tags = {
     "Name" = "vpc"
   }
 
-  subnet_tags = {
+  # Public subnet tags
+  public_subnet_tags = {
     "kubernetes.io/cluster/${local.cluster_name}" = "shared"
     "kubernetes.io/role/elb"                      = 1
   }
 
-  # If you need more custom subnet tags, you can set them directly
+  # Private subnet tags
   private_subnet_tags = {
     "kubernetes.io/cluster/${local.cluster_name}" = "shared"
     "kubernetes.io/role/internal-elb"             = 1
   }
 
   # Additional options based on your requirement
-  create_nat_gateway = true
-  create_vpc          = true
+  create_vpc = true
 }

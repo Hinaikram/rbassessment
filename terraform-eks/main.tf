@@ -32,7 +32,7 @@ resource "aws_route_table_association" "public_route_table_association" {
 
 # Example EC2 Instance (Ensure it uses Public Subnet)
 resource "aws_instance" "example" {
-  ami           = "ami-xxxxxxxx"   # Update with your chosen AMI
+  ami           = "ami-0e35ddab05955cf57"
   instance_type = "t2.micro"       # Update with your desired instance type
   subnet_id     = aws_subnet.public_subnet.id # Place instance in public subnet
 

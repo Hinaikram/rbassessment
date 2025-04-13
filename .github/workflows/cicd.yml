@@ -63,7 +63,7 @@ jobs:
       with:
         terraform_version: 1.5.0
 
-    - name: Change directory to Terraform config
+    - name: Change to terraform-eks directory
       run: cd terraform-eks
 
     - name: Terraform Init
@@ -104,8 +104,8 @@ jobs:
       with:
         terraform_version: 1.5.0
 
-    - name: Change directory to Terraform config
-      run: cd rbassessment/terraform-eks
+    - name: Change to terraform-eks directory
+      run: cd terraform-eks
 
     - name: Terraform Init
       run: terraform init

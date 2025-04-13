@@ -1,8 +1,3 @@
-# AWS provider configuration
-provider "aws" {
-  region = var.region
-}
-
 # EKS module
 module "eks" {
   source               = "./modules/eks"

@@ -45,15 +45,22 @@ resource "aws_instance" "example" {
   security_groups = [aws_security_group.sg.id]
 }
 
-# Security Group allowing SSH (port 22) from specific IPs
+# Security Group allowing SSH (port 22) and HTTP (port 8080) from specific IPs
 resource "aws_security_group" "sg" {
-  name        = "allow_ssh"
-  description = "Allow SSH access"
+  name        = "allow_ssh_and_http"
+  description = "Allow SSH and HTTP access"
   vpc_id      = aws_vpc.main.id
 
   ingress {
     from_port   = 22
     to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]  # Allow from any IP or restrict to your IP
+  }
+
+  ingress {
+    from_port   = 8080
+    to_port     = 8080
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]  # Allow from any IP or restrict to your IP
   }

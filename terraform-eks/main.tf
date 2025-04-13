@@ -9,7 +9,6 @@ resource "aws_vpc" "main" {
   }
 }
 
-
 # EKS module
 module "eks" {
   source               = "./modules/eks"

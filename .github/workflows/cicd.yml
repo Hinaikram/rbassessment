@@ -67,6 +67,9 @@ jobs:
       with:
         terraform_version: 1.5.0
 
+    - name: Change to Terraform directory
+      run: cd rbassessment/terraform-eks  # Switch to the Terraform configuration directory
+
     - name: Terraform Init
       run: terraform init
 
@@ -104,6 +107,9 @@ jobs:
       uses: hashicorp/setup-terraform@v1
       with:
         terraform_version: 1.5.0
+
+    - name: Change to Terraform directory
+      run: cd rbassessment/terraform-eks  # Switch to the Terraform configuration directory
 
     - name: Terraform Init
       run: terraform init

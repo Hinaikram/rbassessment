@@ -1,4 +1,4 @@
-name: Build Spring Boot App
+name: Build and Deploy Spring Boot App
 
 on:
   push:
@@ -63,6 +63,9 @@ jobs:
       with:
         terraform_version: 1.5.0
 
+    - name: Change directory to Terraform config
+      run: cd rbassessment/terraform-eks
+
     - name: Terraform Init
       run: terraform init
 
@@ -100,6 +103,9 @@ jobs:
       uses: hashicorp/setup-terraform@v1
       with:
         terraform_version: 1.5.0
+
+    - name: Change directory to Terraform config
+      run: cd rbassessment/terraform-eks
 
     - name: Terraform Init
       run: terraform init

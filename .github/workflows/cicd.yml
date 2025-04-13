@@ -68,7 +68,7 @@ jobs:
         terraform_version: 1.5.0
 
     - name: Change to Terraform directory
-      run: cd rbassessment/terraform-eks  # Switch to the Terraform configuration directory
+      run: cd terraform-eks
 
     - name: Terraform Init
       run: terraform init

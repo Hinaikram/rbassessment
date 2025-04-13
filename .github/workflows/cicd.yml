@@ -67,17 +67,17 @@ jobs:
       with:
         terraform_version: 1.5.0
 
-    - name: Change to Terraform directory
-      run: cd terraform-eks
-
     - name: Terraform Init
       run: terraform init
+      working-directory: terraform-eks  # The directory for Terraform configuration inside your repo
 
     - name: Terraform Plan
       run: terraform plan -out=tfplan
+      working-directory: terraform-eks  # The directory for Terraform configuration inside your repo
 
     - name: Terraform Apply
       run: terraform apply -auto-approve tfplan
+      working-directory: terraform-eks  # The directory for Terraform configuration inside your repo
 
     - name: Configure kubectl
       run: |
@@ -108,11 +108,10 @@ jobs:
       with:
         terraform_version: 1.5.0
 
-    - name: Change to Terraform directory
-      run: cd rbassessment/terraform-eks  # Switch to the Terraform configuration directory
-
     - name: Terraform Init
       run: terraform init
+      working-directory: terraform-eks  # The directory for Terraform configuration inside your repo
 
     - name: Terraform Destroy
       run: terraform destroy -auto-approve
+      working-directory: terraform-eks  # The directory for Terraform configuration inside your repo

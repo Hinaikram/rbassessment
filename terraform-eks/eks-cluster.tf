@@ -1,38 +1,49 @@
-module "eks" {
-  source  = "terraform-aws-modules/eks/aws"
-  version = "19.13.1"
+resource "aws_eks_cluster" "example" {
+  name = "example"
 
-  cluster_name    = "rb-cluster"
-  cluster_version = "1.26"
-
-  vpc_id     = module.vpc.vpc_id
-  subnet_ids = module.vpc.private_subnets
-
-  cluster_endpoint_public_access = true
-
-  create_kms_key                    = false
-  attach_cluster_encryption_policy = false
-  # encryption_config is NOT provided intentionally
-
-  eks_managed_node_group_defaults = {
-    ami_type = "AL2_x86_64"
+  access_config {
+    authentication_mode = "API"
   }
 
-  eks_managed_node_groups = {
-    one = {
-      name           = "node-group-1"
-      instance_types = ["t3.small"]
-      min_size       = 1
-      max_size       = 2
-      desired_size   = 1
-    }
+  role_arn = aws_iam_role.example.arn
+  version  = "1.31"
 
-    two = {
-      name           = "node-group-2"
-      instance_types = ["t3.small"]
-      min_size       = 1
-      max_size       = 2
-      desired_size   = 1
-    }
+  vpc_config {
+    subnet_ids = [
+      aws_subnet.az1.id,
+      aws_subnet.az2.id,
+      aws_subnet.az3.id,
+    ]
   }
+
+  # Ensure that IAM Role permissions are created before and deleted
+  # after EKS Cluster handling. Otherwise, EKS will not be able to
+  # properly delete EKS managed EC2 infrastructure such as Security Groups.
+  depends_on = [
+    aws_iam_role_policy_attachment.cluster_AmazonEKSClusterPolicy,
+  ]
+}
+
+resource "aws_iam_role" "cluster" {
+  name = "eks-cluster-example"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "sts:AssumeRole",
+          "sts:TagSession"
+        ]
+        Effect = "Allow"
+        Principal = {
+          Service = "eks.amazonaws.com"
+        }
+      },
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "cluster_AmazonEKSClusterPolicy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+  role       = aws_iam_role.cluster.name
 }

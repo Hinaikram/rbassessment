@@ -2,7 +2,7 @@ module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "19.13.1"
 
-  cluster_name    = local.cluster_name
+  cluster_name    = "rb-cluster"
   cluster_version = "1.26"  # Updated Kubernetes version to a supported one
 
   vpc_id     = module.vpc.vpc_id

@@ -9,13 +9,14 @@ module "eks" {
   subnet_ids = module.vpc.private_subnets
   cluster_endpoint_public_access = true
 
-  create_cloudwatch_log_group = false  # <-- Avoid conflict with existing log group
+  create_kms_key               = false            # ✅ Don't create a new KMS key
+  attach_cluster_encryption_policy = false        # ✅ Avoid attaching policy if not needed
+  create_cloudwatch_log_group = false             # ✅ Don't create log group (if already exists)
 
-  # Optional: Use an existing KMS key if encryption is enabled
-  # If you're not using encryption, you can omit the below block
+  # Optional – if you are using encryption, reference existing key instead
   # cluster_encryption_config = {
   #   resources        = ["secrets"]
-  #   provider_key_arn = "arn:aws:kms:ap-south-1:<your-account-id>:key/<existing-kms-key-id>"
+  #   provider_key_arn = "arn:aws:kms:<region>:<account-id>:key/<your-existing-key-id>"
   # }
 
   eks_managed_node_group_defaults = {
@@ -24,23 +25,19 @@ module "eks" {
 
   eks_managed_node_groups = {
     one = {
-      name = "node-group-1"
-
-      instance_types = ["t3.small"]
-
-      min_size     = 1
-      max_size     = 1
-      desired_size = 1
+      name            = "node-group-1"
+      instance_types  = ["t3.small"]
+      min_size        = 1
+      max_size        = 2
+      desired_size    = 1
     }
 
     two = {
-      name = "node-group-2"
-
-      instance_types = ["t3.small"]
-
-      min_size     = 1
-      max_size     = 1
-      desired_size = 1
+      name            = "node-group-2"
+      instance_types  = ["t3.small"]
+      min_size        = 1
+      max_size        = 2
+      desired_size    = 1
     }
   }
 }

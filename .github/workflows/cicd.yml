@@ -86,7 +86,7 @@ jobs:
 
       - name: Configure kubectl
         run: |
-          aws eks --region ${{ secrets.AWS_REGION }} update-kubeconfig --name my-cluster
+          aws eks --region ${{ secrets.AWS_REGION }} update-kubeconfig --name rb-cluster
 
       - name: Deploy Docker Image to EKS
         run: |
